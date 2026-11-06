@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform-atlas.local/schema/atlas-v1.schema.json",
+  "title": "Platform Atlas Document v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "generator",
+    "scan",
+    "districts",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "repository", "remoteUrl", "requestedRef", "commit"],
+      "properties": {
+        "provider": {
+          "const": "local-git"
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remoteUrl": {
+          "type": ["string", "null"]
+        },
+        "requestedRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40,64}$"
+        }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "configHash"],
+      "properties": {
+        "name": {
+          "const": "platform-atlas-generator"
+        },
+        "version": {
+          "type": "string"
+        },
+        "configHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trackedFiles",
+        "eligibleFiles",
+        "analyzedFiles",
+        "analyzedBytes",
+        "skippedFiles",
+        "incomplete",
+        "limits",
+        "diagnostics"
+      ],
+      "properties": {
+        "trackedFiles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eligibleFiles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "analyzedFiles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "analyzedBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skippedFiles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "incomplete": {
+          "type": "boolean"
+        },
+        "limits": {
+          "$ref": "#/$defs/limits"
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        }
+      }
+    },
+    "districts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/district"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    }
+  },
+  "$defs": {
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxTrackedFiles",
+        "maxGitTreeBytes",
+        "maxFileBytes",
+        "maxTotalBytes",
+        "maxDistricts",
+        "maxNodes",
+        "maxEdges"
+      ],
+      "properties": {
+        "maxTrackedFiles": { "type": "integer", "minimum": 1 },
+        "maxGitTreeBytes": { "type": "integer", "minimum": 1024 },
+        "maxFileBytes": { "type": "integer", "minimum": 1 },
+        "maxTotalBytes": { "type": "integer", "minimum": 1 },
+        "maxDistricts": { "type": "integer", "minimum": 1 },
+        "maxNodes": { "type": "integer", "minimum": 1 },
+        "maxEdges": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "enum": ["info", "warning"] },
+        "message": { "type": "string" },
+        "path": { "type": "string" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "line", "extractor"],
+      "properties": {
+        "path": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "extractor": { "type": "string" }
+      }
+    },
+    "truth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "runtime", "deployment"],
+      "properties": {
+        "repository": { "enum": ["observed", "declared", "heuristic"] },
+        "runtime": { "const": "unverified" },
+        "deployment": { "const": "unverified" }
+      }
+    },
+    "district": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label", "path", "nodeCount", "bytes"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["package", "directory", "root", "other"] },
+        "label": { "type": "string" },
+        "path": { "type": "string" },
+        "manifestPath": { "type": "string" },
+        "nodeCount": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "path",
+        "districtId",
+        "language",
+        "bytes",
+        "truth",
+        "evidence"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["manifest", "module"] },
+        "label": { "type": "string" },
+        "path": { "type": "string" },
+        "districtId": { "type": "string" },
+        "language": { "enum": ["javascript", "typescript", "php", "ruby", "json"] },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "packageName": { "type": "string" },
+        "truth": { "$ref": "#/$defs/truth" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "kind", "label", "confidence", "truth", "evidence"],
+      "properties": {
+        "id": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "kind": { "enum": ["imports", "includes", "requires", "declares-dependency"] },
+        "label": { "type": "string" },
+        "confidence": { "enum": ["high", "medium"] },
+        "truth": { "$ref": "#/$defs/truth" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        }
+      }
+    }
+  }
+}

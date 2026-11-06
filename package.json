@@ -1,0 +1,24 @@
+{
+  "name": "platform-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Explore a codebase as a city: a static, source-grounded 3D architecture atlas with curated WooCommerce and Gumroad atlases.",
+  "keywords": ["architecture", "codebase", "visualization", "threejs", "static-site", "woocommerce", "gumroad"],
+  "homepage": "https://github.com/doniv01/platform-atlas#readme",
+  "repository": { "type": "git", "url": "git+https://github.com/doniv01/platform-atlas.git" },
+  "bugs": { "url": "https://github.com/doniv01/platform-atlas/issues" },
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "npm run dev",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs --preview",
+    "check": "node scripts/check.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "source:fetch": "node scripts/fetch-source.mjs",
+    "atlas:generate": "node scripts/generate-pack.mjs",
+    "scan": "node scripts/atlas-generate.mjs"
+  }
+}

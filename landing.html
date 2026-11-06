@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f2ec" />
+    <meta name="description" content="Get your bearings in WooCommerce and Gumroad. Explore a codebase as a city, follow a source walkthrough, and open the evidence behind each module." />
+    <title>Platform Atlas · Get your bearings in the code</title>
+    <link rel="icon" href="./assets/repository-mark.svg" type="image/svg+xml" />
+    <link rel="preload" href="./assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./src/styles/landing.css" />
+    <script type="module" src="./src/landing.mjs"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header page-width">
+      <a class="wordmark" href="./landing.html" aria-label="Platform Atlas home">
+        <span class="wordmark-icon" data-icon="cube" aria-hidden="true"></span>
+        <span>Platform Atlas</span>
+      </a>
+      <nav aria-label="Page navigation">
+        <a href="#repositories">The repositories</a>
+        <a href="#about">About</a>
+        <a class="nav-demo" href="./?atlas=woocommerce">Open the demo <span data-icon="arrow-up-right" aria-hidden="true"></span></a>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section class="hero page-width" aria-labelledby="hero-title">
+        <div class="hero-intro">
+          <h1 id="hero-title">Get your bearings.<br /><span>Then read the code.</span></h1>
+          <div class="hero-description">
+            <p>A codebase is easier to approach when you can see how it fits together. Explore WooCommerce and Gumroad as cities, then follow the connections back to source.</p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="./?atlas=woocommerce">Explore the atlas <span data-icon="arrow-right" aria-hidden="true"></span></a>
+              <a class="text-link" href="https://github.com/doniv01/platform-atlas">View project on GitHub <span data-icon="arrow-up-right" aria-hidden="true"></span></a>
+            </div>
+          </div>
+        </div>
+        <figure class="atlas-figure" data-reveal>
+          <a class="atlas-preview" href="./?atlas=woocommerce" aria-label="Open the interactive WooCommerce atlas">
+            <img id="atlas-preview-image" src="./assets/launch/atlas-overview.jpg" width="1920" height="1080" fetchpriority="high" alt="The WooCommerce atlas: a three-dimensional city of modules grouped into districts, with connections between them." />
+            <span class="preview-action"><span data-icon="arrow-up-right" aria-hidden="true"></span><span>Step inside</span></span>
+          </a>
+          <figcaption><span>A view of the actual app. Every tower is a way into the source.</span><span class="mono">Three.js · Static hosting · Open source</span></figcaption>
+        </figure>
+      </section>
+
+      <section id="repositories" class="repositories page-width" aria-labelledby="repositories-title">
+        <div class="section-intro" data-reveal>
+          <h2 id="repositories-title">Two codebases.<br />A place to start.</h2>
+          <p>Choose a repository and look around. When you want a route through it, open a walkthrough. The included maps are curated snapshots, not live scans.</p>
+        </div>
+        <div class="repository-grid">
+          <article class="repository" data-reveal>
+            <div class="repository-intro">
+              <div class="repository-art repository-art-woo" aria-hidden="true">
+                <span data-icon="storefront"></span>
+                <img src="./assets/repositories/woocommerce-3d.png" width="128" height="128" decoding="async" alt="" />
+              </div>
+              <div><h3>WooCommerce</h3><p>From block checkout to the Store API, orders, and payment boundaries.</p></div>
+            </div>
+            <p class="repository-metadata mono">48 modules · 8 districts · 69 connections</p>
+            <div class="repository-actions">
+              <a class="text-link repository-entry" href="./?atlas=woocommerce">Explore WooCommerce <span data-icon="arrow-right" aria-hidden="true"></span></a>
+              <a class="upstream-link" href="https://github.com/woocommerce/woocommerce/tree/5d86d8f40b68039d16419049a40a3abf065ca71c" aria-label="Mapped WooCommerce source at revision 5d86d8f40b68">Mapped source <span class="mono">5d86d8f40b68</span><span data-icon="arrow-up-right" aria-hidden="true"></span></a>
+            </div>
+          </article>
+          <article class="repository" data-reveal>
+            <div class="repository-intro">
+              <div class="repository-art repository-art-gumroad" aria-hidden="true">
+                <span data-icon="package"></span>
+                <img src="./assets/repositories/gumroad-3d.png" width="128" height="128" decoding="async" alt="" />
+              </div>
+              <div><h3>Gumroad</h3><p>Follow a digital purchase from storefront and payment to fulfillment and settlement.</p></div>
+            </div>
+            <p class="repository-metadata mono">47 modules · 10 districts · 40 connections</p>
+            <div class="repository-actions">
+              <a class="text-link repository-entry" href="./?atlas=gumroad">Explore Gumroad <span data-icon="arrow-right" aria-hidden="true"></span></a>
+              <a class="upstream-link" href="https://github.com/antiwork/gumroad/tree/29bb68b1c37884b66a07062c7dcf9e19a71766d8" aria-label="Mapped Gumroad source at revision 29bb68b1c378">Mapped source <span class="mono">29bb68b1c378</span><span data-icon="arrow-up-right" aria-hidden="true"></span></a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="reading-section" aria-labelledby="reading-title">
+        <div class="reading-layout page-width">
+          <div class="reading-intro" data-reveal>
+            <h2 id="reading-title">The city is the overview.<br />The source is the reference.</h2>
+            <p>You don’t have to read a whole repository to find a useful starting point. Keep the map beside the code, and check the evidence as you go.</p>
+            <a class="text-link" href="./?atlas=woocommerce#journey">Try a guided walkthrough <span data-icon="arrow-right" aria-hidden="true"></span></a>
+          </div>
+          <ol class="reading-steps">
+            <li data-reveal><span class="step-number mono" aria-hidden="true">01</span><div><h3>Find a part you recognise.</h3><p>Explore a district, search for a module, or use the module index when you want a simpler reading view.</p></div></li>
+            <li data-reveal><span class="step-number mono" aria-hidden="true">02</span><div><h3>See what connects to it.</h3><p>Select a tower for its source panel. A walkthrough follows a specific path through the curated map.</p></div></li>
+            <li data-reveal><span class="step-number mono" aria-hidden="true">03</span><div><h3>Open the evidence.</h3><p>Follow a listed file or directory to the pinned GitHub revision. Source evidence is not proof of live traffic, enabled features, or deployment.</p></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <section id="about" class="about page-width" aria-labelledby="about-title">
+        <h2 id="about-title" data-reveal>An open project.<br />A different way in.</h2>
+        <div class="about-copy" data-reveal>
+          <p>Platform Atlas is a source-grounded architecture explorer by <a href="https://github.com/doniv01">@doniv01</a>. The idea is simple: give an unfamiliar codebase a shape, and keep the files within reach.</p>
+          <p>The viewer is a static site. Run it locally, host it on GitHub Pages, or use the source tooling to generate an exploratory pack from a fetched WooCommerce or Gumroad revision. Generated packs are labelled separately from the curated demos.</p>
+          <div class="about-actions">
+            <a class="button button-primary" href="https://github.com/doniv01/platform-atlas">Get the project source <span data-icon="arrow-up-right" aria-hidden="true"></span></a>
+            <a class="text-link" href="https://github.com/doniv01/platform-atlas/issues">Report an issue <span data-icon="arrow-up-right" aria-hidden="true"></span></a>
+          </div>
+          <p class="project-note">Independent project. WooCommerce and Gumroad are the repositories being explored; their inclusion does not imply affiliation or endorsement.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer page-width">
+      <a class="wordmark" href="./landing.html">Platform Atlas</a>
+      <p>Made to be explored. Built to be read.</p>
+      <div><a href="./LICENSE">MIT license</a><a href="https://github.com/doniv01">@doniv01 <span data-icon="arrow-up-right" aria-hidden="true"></span></a></div>
+    </footer>
+  </body>
+</html>

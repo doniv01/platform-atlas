@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-8XvUhfOyAQ0xrN2l4lAR1NWN2swizirH1cFFwd7NzCY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="An immersive, source-grounded 3D atlas of a codebase. Explore architecture as a navigable city." />
+    <meta name="theme-color" content="#101719" />
+    <title>Platform Atlas</title>
+    <link rel="icon" href="./assets/repository-mark.svg" type="image/svg+xml" />
+    <meta name="atlas-module" content="./atlases/woocommerce/atlas-data.mjs" />
+    <link rel="preload" href="./assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="./src/styles/foundation.css" />
+    <link rel="stylesheet" href="./src/styles/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#map-viewport">Skip to the architecture view</a>
+
+    <main id="atlas-main" class="atlas-shell" data-surface="map">
+      <div class="header-label-shield" data-label-shield aria-hidden="true"></div>
+
+      <!-- 3D stage -->
+      <section class="stage" aria-labelledby="map-heading">
+        <div class="map-context visually-hidden">
+          <p id="map-kicker">Repository</p>
+          <h1 id="map-heading">Repository</h1>
+          <p id="map-subtitle">Curated source modules grouped by system domain. Runtime and deployment remain explicitly unverified.</p>
+        </div>
+        <div id="map-viewport" class="map-viewport" tabindex="-1" aria-describedby="map-instructions">
+          <canvas id="atlas-gpu" class="atlas-gpu" aria-hidden="true"></canvas>
+          <svg id="atlas-map" viewBox="0 0 1120 700" role="group" aria-labelledby="map-heading map-description">
+            <desc id="map-description">Interactive spatial architecture model of source modules and their relationships.</desc>
+            <defs>
+              <marker id="arrow-broadcast" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a78bfa"></path></marker>
+              <marker id="arrow-contains" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"></path></marker>
+              <marker id="arrow-deployment" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7c8798"></path></marker>
+              <marker id="arrow-event" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a78bfa"></path></marker>
+              <marker id="arrow-read" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#60a5fa"></path></marker>
+              <marker id="arrow-request" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"></path></marker>
+              <marker id="arrow-response" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399"></path></marker>
+              <marker id="arrow-write" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fb7185"></path></marker>
+              <filter id="selected-node-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7" result="blur"></feGaussianBlur><feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter>
+            </defs>
+            <g id="atlas-map-layer"></g>
+          </svg>
+          <div id="atlas-labels" class="city-labels" aria-hidden="true"></div>
+          <div id="map-empty" class="map-empty" hidden>
+            <strong>No matching modules</strong>
+            <span>Try another search, or show every status.</span>
+            <button id="map-empty-reset" class="text-button" type="button">Clear search and filters</button>
+          </div>
+          <p id="map-instructions" class="visually-hidden">Drag to pan · Scroll to zoom · O orbit · A move</p>
+        </div>
+      </section>
+
+      <!-- Module index -->
+      <section id="explore-view" class="explore" aria-labelledby="explore-heading" hidden>
+        <div class="explore-inner">
+          <header class="explore-header">
+            <button class="explore-close" type="button" id="explore-close" data-icon="x" data-icon-size="14" aria-label="Back to the map"><span>Back to map</span></button>
+            <h2 id="explore-heading">The module index</h2>
+            <p id="explore-subtitle" class="explore-subtitle"></p>
+          </header>
+          <div id="explore-filters" class="explore-filters" role="group" aria-label="Filter modules"></div>
+          <div id="explore-grid" class="explore-grid"></div>
+        </div>
+      </section>
+
+      <!-- Left rail -->
+      <nav class="rail" aria-label="Primary" data-label-shield>
+        <a class="rail-home" href="./landing.html" aria-label="About Platform Atlas" title="About Platform Atlas" data-icon="map-trifold" data-icon-size="28" data-icon-weight="regular"></a>
+        <div class="rail-group">
+          <button class="rail-button is-selected" type="button" data-view="repository" aria-pressed="true" data-icon="globe-hemisphere-west" data-icon-fill><span class="nav-label">Map</span></button>
+          <button class="rail-button" type="button" id="explore-button" aria-pressed="false" data-icon="compass" data-icon-fill><span class="nav-label">Modules</span></button>
+          <button class="rail-button" type="button" data-view="journey" aria-pressed="false" aria-label="Walkthrough" data-icon="path" data-icon-fill><span class="nav-label">Walkthrough</span><span class="nav-label nav-label-short" aria-hidden="true">Guide</span></button>
+          <button class="rail-button" type="button" id="explorer-button" aria-controls="explorer-panel" aria-expanded="false" data-icon="sliders-horizontal" data-icon-fill><span class="nav-label">Filters</span></button>
+        </div>
+        <div class="rail-group rail-bottom">
+          <div class="chip-menu" id="project-menu">
+            <button class="rail-logo" type="button" id="project-menu-button" aria-haspopup="menu" aria-expanded="false" data-icon="gear" data-icon-size="22" data-icon-weight="regular"><span class="nav-label">Settings</span></button>
+            <div class="menu menu-project" role="menu" hidden>
+              <div class="appearance-settings" role="group" aria-label="Scene finish">
+                <p class="settings-label">Scene finish</p>
+                <button class="menu-item" type="button" role="menuitemradio" aria-checked="true" data-appearance="luminous" data-icon="sun" data-icon-size="20" data-icon-weight="regular"><span>Luminous</span><span class="choice-check" data-icon="check" data-icon-size="18" data-icon-weight="regular"></span></button>
+                <button class="menu-item" type="button" role="menuitemradio" aria-checked="false" data-appearance="matte" data-icon="circle" data-icon-size="20" data-icon-weight="regular"><span>Matte</span><span class="choice-check" data-icon="check" data-icon-size="18" data-icon-weight="regular"></span></button>
+                <button class="menu-item" type="button" role="menuitemradio" aria-checked="false" data-appearance="architectural" data-icon="cube" data-icon-size="20" data-icon-weight="regular"><span>Architectural</span><span class="choice-check" data-icon="check" data-icon-size="18" data-icon-weight="regular"></span></button>
+                <p class="settings-note">Luminous glows, Matte stays quiet, and Architectural adds stepped towers. The choice is saved in this browser.</p>
+              </div>
+              <hr class="menu-sep" />
+              <button class="menu-item" type="button" role="menuitem" id="surprise-button" data-icon="shuffle" data-icon-size="20" data-icon-weight="regular"><span>Surprise me</span></button>
+              <button class="menu-item" type="button" role="menuitem" id="workspace-button" aria-pressed="false"><span>Focus mode</span></button>
+              <hr class="menu-sep" />
+              <button class="menu-item" type="button" role="menuitem" id="view-reset" data-icon="crosshair" data-icon-size="20" data-icon-weight="regular"><span>Reset view</span></button>
+              <button class="menu-item" type="button" role="menuitem" id="replay-entrance" data-icon="play" data-icon-size="20" data-icon-weight="regular"><span>Replay entrance</span></button>
+              <button class="menu-item" type="button" role="menuitem" id="layout-reset" data-icon="arrows-out-cardinal" data-icon-size="20" data-icon-weight="regular"><span>Reset moved modules</span></button>
+              <hr class="menu-sep" />
+              <button class="menu-item" type="button" role="menuitem" id="tour-menu" data-icon="sparkle" data-icon-size="20" data-icon-weight="regular"><span>Take the tour</span></button>
+              <button class="menu-item" type="button" role="menuitem" id="shortcuts-button" aria-controls="shortcuts-popover" aria-expanded="false" data-icon="keyboard" data-icon-size="20" data-icon-weight="regular"><span>Keyboard shortcuts</span><kbd>?</kbd></button>
+            </div>
+          </div>
+          <button class="rail-button" type="button" id="help-button" aria-haspopup="dialog" data-icon="question" data-icon-fill><span class="nav-label">About &amp; help</span></button>
+        </div>
+      </nav>
+
+      <!-- Product and repository identity -->
+      <div class="project-title" data-label-shield>
+        <a class="product-wordmark" href="./landing.html">Platform Atlas</a>
+        <div class="chip-menu" id="atlas-switcher">
+          <button class="rail-avatar" type="button" id="atlas-switch-button" aria-haspopup="menu" aria-expanded="false">
+            <img id="atlas-art" class="repository-art" src="./assets/repository-mark.svg" alt="" width="56" height="56" decoding="async" />
+            <strong id="brand-name">Platform Atlas</strong>
+            <span class="repository-chevron" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span>
+          </button>
+          <div class="menu" role="menu" hidden id="atlas-switch-menu"><p class="menu-label">Atlases</p></div>
+        </div>
+        <a id="repository-link" class="repository-origin" href="#" target="_blank" rel="noreferrer noopener">
+          <span data-icon="git-branch" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span>
+          <span>Source repository</span>
+          <code id="repository-revision"></code>
+          <span data-icon="arrow-up-right" data-icon-size="16" data-icon-weight="regular" aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <aside class="scene-caption" data-label-shield>
+        <p id="scene-summary"></p>
+        <button id="scene-readme" type="button"><span data-icon="info" data-icon-size="16" data-icon-weight="regular" aria-hidden="true"></span><span>A source snapshot, not live traffic</span></button>
+      </aside>
+      <p class="atlas-navigation-hint" aria-hidden="true" data-label-shield><span id="atlas-gesture">Drag to pan</span><i></i>Scroll to zoom<i></i>Click a tower to inspect</p>
+
+      <!-- Top-right actions -->
+      <div class="topbar" data-label-shield>
+        <a class="pill project-github" href="https://github.com/doniv01/platform-atlas" target="_blank" rel="noreferrer noopener" data-icon="github-logo" data-icon-size="20"><span>GitHub</span></a>
+        <div class="chip-menu" id="share-menu">
+          <button class="pill" type="button" id="share-open" aria-haspopup="menu" aria-expanded="false" data-icon="export" data-icon-size="20"><span>Share</span></button>
+          <div class="menu menu-share" role="menu" hidden>
+            <button class="menu-item" type="button" role="menuitem" id="share-button" data-icon="link" data-icon-size="20" data-icon-weight="regular"><span>Copy link</span></button>
+            <button class="menu-item" type="button" role="menuitem" id="screenshot-button" data-icon="image" data-icon-size="20" data-icon-weight="regular"><span>Save PNG</span></button>
+            <hr class="menu-sep" />
+            <button class="menu-item" type="button" role="menuitem" id="view-save" data-icon="floppy-disk" data-icon-size="20" data-icon-weight="regular"><span>Save view</span></button>
+            <button class="menu-item" type="button" role="menuitem" id="view-clear-save" data-icon="x" data-icon-size="20" data-icon-weight="regular"><span>Clear saved view</span></button>
+          </div>
+        </div>
+      </div>
+      <script type="application/json" id="atlas-registry">
+      [
+        { "id": "woocommerce", "title": "WooCommerce", "repository": "woocommerce/woocommerce", "summary": "Checkout, Store API, orders, and the dual order stores.", "art": "./assets/repositories/woocommerce-3d.png" },
+        { "id": "gumroad", "title": "Gumroad", "repository": "antiwork/gumroad", "summary": "Buying one paid digital product, from storefront to receipt.", "art": "./assets/repositories/gumroad-3d.png" }
+      ]
+      </script>
+
+      <!-- Search -->
+      <div id="omnibox-wrap" class="omnibox-wrap is-collapsed" data-label-shield>
+        <form id="omnibox" class="omnibox" role="search" autocomplete="off">
+          <button class="omnibox-launch" type="button" id="omnibox-launch" data-icon="magnifying-glass" data-icon-size="17" data-icon-weight="regular"><span>Search</span><kbd>/</kbd></button>
+          <span class="omnibox-icon" data-icon="magnifying-glass" data-icon-size="17" data-icon-weight="regular" aria-hidden="true"></span>
+          <label class="visually-hidden" for="atlas-search">Search modules, paths, and walkthroughs</label>
+          <input id="atlas-search" type="search" placeholder="Search modules, paths, or walkthroughs" autocomplete="off" spellcheck="false" tabindex="-1" />
+          <output id="search-count" class="omnibox-count" aria-live="polite"></output>
+          <button class="omnibox-filter" type="button" id="omnibox-filters" aria-controls="explorer-panel" aria-expanded="false" data-icon="funnel" data-icon-size="16" data-icon-weight="regular" data-tip="Filters"><span class="visually-hidden">Open filters</span></button>
+          <button class="omnibox-filter omnibox-close" type="button" id="omnibox-close" data-icon="x" data-icon-size="14" aria-label="Close search"></button>
+        </form>
+        <ul id="search-results" class="omnibox-results" aria-label="Search results"></ul>
+      </div>
+
+      <!-- Bottom dock -->
+      <div id="map-toolbar" class="dock" role="toolbar" aria-label="View controls" data-label-shield>
+        <div class="dock-group" role="group" aria-label="Navigate">
+          <button class="dock-button" type="button" data-interaction="pan" aria-pressed="true" data-icon="hand" data-icon-fill data-tip="Pan (P)"><span class="visually-hidden">Pan</span></button>
+          <button class="dock-button" type="button" data-interaction="orbit" aria-pressed="false" data-icon="arrows-clockwise" data-icon-fill data-tip="Orbit (O)"><span class="visually-hidden">Orbit</span></button>
+          <button class="dock-button" type="button" data-interaction="arrange" aria-pressed="false" data-icon="arrows-out-cardinal" data-icon-fill data-tip="Move modules (A)"><span class="visually-hidden">Move modules</span></button>
+        </div>
+        <div class="dock-group" role="group" aria-label="Display">
+          <button class="dock-button display-mode is-selected" type="button" data-mode="perspective" aria-label="3D city" aria-pressed="true" data-icon="cube" data-icon-fill data-tip="3D city"><span>3D</span></button>
+          <button class="dock-button display-mode" type="button" data-mode="flat" aria-label="Flat diagram" aria-pressed="false" data-icon="squares-four" data-icon-fill data-tip="Flat diagram"><span>Flat</span></button>
+          <button class="dock-button toolbar-icon-button is-selected" type="button" data-label-toggle="compact" aria-pressed="true" data-icon="text-aa" data-icon-weight="regular" data-tip="Labels (L)"><span class="visually-hidden">Toggle labels</span></button>
+        </div>
+        <div class="dock-group" role="group" aria-label="Frame">
+          <button class="dock-button" type="button" id="camera-reset" data-icon="navigation-arrow" data-icon-fill data-tip="Fit current view"><span class="visually-hidden">Fit current view</span></button>
+        </div>
+      </div>
+
+      <!-- Bottom-right stack -->
+      <div class="corner-stack" data-label-shield>
+        <div class="zoom-pill chip-menu" id="presets-menu">
+          <button class="zoom-step" type="button" id="zoom-out" data-icon="minus" data-icon-size="12" aria-label="Zoom out"></button>
+          <span id="zoom-level" class="zoom-level">79%</span>
+          <button class="zoom-step" type="button" id="zoom-in" data-icon="plus" data-icon-size="12" aria-label="Zoom in"></button>
+          <button class="zoom-caret" type="button" id="presets-button" aria-haspopup="menu" aria-expanded="false" data-icon="caret-down" data-icon-size="11" data-tip="Camera presets"><span class="visually-hidden">Camera presets</span></button>
+          <div class="menu" role="menu" hidden>
+            <p class="menu-label">Camera</p>
+            <button class="menu-item" type="button" role="menuitem" data-camera="overview">Overview</button>
+            <button class="menu-item" type="button" role="menuitem" data-camera="flows">Flow</button>
+            <button class="menu-item" type="button" role="menuitem" data-camera="boundaries">Boundaries</button>
+            <button class="menu-item" type="button" role="menuitem" data-camera="journey">Walkthrough</button>
+            <p class="menu-label">Snap</p>
+            <button class="menu-item" type="button" role="menuitem" data-camera-snap="front">Front</button>
+            <button class="menu-item" type="button" role="menuitem" data-camera-snap="top">Top</button>
+            <button class="menu-item" type="button" role="menuitem" data-camera-snap="side">Side</button>
+          </div>
+        </div>
+        <button class="status-pill" type="button" id="info-button" aria-controls="legend-popover" aria-expanded="false"><span data-icon="stack" data-icon-size="20" data-icon-weight="regular" aria-hidden="true"></span><span class="status-label">Legend</span><span class="status-caret" data-icon="caret-up" data-icon-size="16" aria-hidden="true"></span></button>
+        <button class="angle-orb" type="button" id="angle-toggle" aria-controls="orientation-gizmo" aria-expanded="false">
+          <span class="orientation-symbol" data-icon="compass" data-icon-size="22" aria-hidden="true"></span>
+          <span class="angle-label">Angle &amp; layers</span>
+          <span data-icon="caret-up" data-icon-size="16" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- Angle & layers popover -->
+      <aside id="orientation-gizmo" class="popover angle-popover" data-label-shield aria-label="View angle and layers" hidden>
+        <header class="popover-header">
+          <strong class="popover-title">Angle &amp; layers</strong>
+          <span id="gizmo-readout" class="gizmo-readout">NW · 42°</span>
+          <button class="popover-close" type="button" id="angle-close" data-icon="x" data-icon-size="14" aria-label="Close angle panel"></button>
+        </header>
+        <div class="gizmo-body">
+          <div class="gizmo-orb-row">
+            <div id="gizmo-trackball" class="gizmo-orb" role="slider" tabindex="0" aria-label="Viewing angle. Drag or use arrow keys to turn and tilt" aria-valuemin="-180" aria-valuemax="180" aria-valuenow="-32" aria-valuetext="Angle control">
+              <span class="gizmo-compass gizmo-compass-n" aria-hidden="true">N</span>
+              <span class="gizmo-compass gizmo-compass-e" aria-hidden="true">E</span>
+              <span class="gizmo-compass gizmo-compass-s" aria-hidden="true">S</span>
+              <span class="gizmo-compass gizmo-compass-w" aria-hidden="true">W</span>
+              <div id="gizmo-needle" class="gizmo-needle"><span data-icon="navigation-arrow" data-icon-size="32" aria-hidden="true"></span></div>
+            </div>
+            <div class="gizmo-faces" role="group" aria-label="Quick angles">
+              <button type="button" class="seg" data-camera-snap="front">Front</button>
+              <button type="button" class="seg" data-camera-snap="top">Top</button>
+              <button type="button" class="seg" data-camera-snap="side">Side</button>
+              <button type="button" class="seg seg-quiet" id="gizmo-home">Home</button>
+            </div>
+          </div>
+          <div class="popover-row">
+            <span class="popover-row-label">Tilt &amp; turn</span>
+            <div class="segment-group" role="group" aria-label="Rotate and tilt">
+              <button id="rotate-left" class="mini" type="button" data-icon="arrow-counter-clockwise" data-icon-size="14" aria-label="Rotate left"></button>
+              <button id="tilt-up" class="mini" type="button" data-icon="caret-up" data-icon-size="14" aria-label="Tilt up"></button>
+              <button id="tilt-down" class="mini" type="button" data-icon="caret-down" data-icon-size="14" aria-label="Tilt down"></button>
+              <button id="rotate-right" class="mini" type="button" data-icon="arrow-clockwise" data-icon-size="14" aria-label="Rotate right"></button>
+            </div>
+          </div>
+          <div class="popover-row gizmo-density" role="group" aria-label="Show map layers">
+            <span class="popover-row-label">Show</span>
+            <div class="gizmo-density-chips segment-group" role="radiogroup" aria-label="Choose visible map layers">
+              <button type="button" class="seg" data-map-density="all" role="radio" aria-checked="true">All</button>
+              <button type="button" class="seg" data-map-density="districts" role="radio" aria-checked="false">Districts</button>
+              <button type="button" class="seg" data-map-density="modules" role="radio" aria-checked="false">Modules</button>
+            </div>
+          </div>
+          <details class="popover-details">
+            <summary>Precise camera<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary>
+            <div class="range-control"><label for="camera-pitch">Pitch <output id="camera-pitch-value"></output></label><input id="camera-pitch" type="range" min="8" max="90" value="42" /></div>
+            <div class="range-control"><label for="camera-bearing">Bearing <output id="camera-bearing-value"></output></label><input id="camera-bearing" type="range" min="-180" max="180" value="-32" /></div>
+            <div class="range-control"><label for="camera-depth">Depth <output id="camera-depth-value"></output></label><input id="camera-depth" type="range" min="12" max="42" value="20" /></div>
+            <span id="camera-readout" class="camera-readout"></span>
+          </details>
+        </div>
+      </aside>
+
+      <!-- Legend popover -->
+      <aside id="legend-popover" class="popover legend-popover" data-label-shield aria-label="Legend" hidden>
+        <header class="popover-header"><strong class="popover-title">How to read the city</strong><button class="popover-close" type="button" id="legend-close" data-icon="x" data-icon-size="14" aria-label="Close legend"></button></header>
+        <div class="popover-body">
+          <p class="legend-lede">Each tower is a source module, colored by its district. Height follows the number of source files, and a wider base means more connections. A connection takes the color of the module it starts from.</p>
+          <ul id="edge-legend" class="edge-legend"></ul>
+          <ul id="district-legend" class="district-legend"></ul>
+          <ul id="truth-semantics" class="truth-semantics"></ul>
+        </div>
+      </aside>
+
+      <!-- Shortcuts popover -->
+      <aside id="shortcuts-popover" class="popover shortcuts-popover" aria-label="Keyboard shortcuts" hidden>
+        <header class="popover-header"><strong class="popover-title">Shortcuts</strong><button class="popover-close" type="button" id="shortcuts-close" data-icon="x" data-icon-size="14" aria-label="Close shortcuts"></button></header>
+        <dl class="shortcut-list">
+          <div><dt><kbd>/</kbd></dt><dd>Search</dd></div>
+          <div><dt><kbd>R</kbd> <kbd>E</kbd> <kbd>J</kbd></dt><dd>Map · Modules · Walkthrough</dd></div>
+          <div><dt><kbd>P</kbd> <kbd>O</kbd> <kbd>A</kbd></dt><dd>Pan · Orbit · Move</dd></div>
+          <div><dt><kbd>I</kbd></dt><dd>Source panel</dd></div>
+          <div><dt><kbd>L</kbd></dt><dd>Labels</dd></div>
+          <div><dt><kbd>M</kbd></dt><dd>Focus mode</dd></div>
+          <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Previous / next call in a walkthrough</dd></div>
+          <div><dt><kbd>Esc</kbd></dt><dd>Close the current panel</dd></div>
+          <div><dt><kbd>?</kbd></dt><dd>Help</dd></div>
+        </dl>
+      </aside>
+
+      <!-- Filters & index panel -->
+      <aside id="explorer-panel" class="panel panel-left drawer explorer-panel" aria-labelledby="explorer-heading" aria-hidden="true" inert data-label-shield>
+        <section class="island">
+          <header class="panel-header">
+            <h2 id="explorer-heading">Filters</h2>
+            <button class="popover-close" type="button" data-drawer-close="explorer" data-icon="x" data-icon-size="14" aria-label="Close filters"></button>
+          </header>
+          <div class="panel-body drawer-body">
+            <section class="panel-section">
+              <div class="section-heading-row"><h3>Group by</h3><button id="explorer-reset" class="text-button" type="button">Reset filters</button></div>
+              <div class="segment-group is-fill" role="group" aria-label="Choose repository grouping">
+                <button class="seg is-selected" type="button" data-lens="system" aria-pressed="true">System</button>
+                <button class="seg" type="button" data-lens="repository" aria-pressed="false">Folders</button>
+              </div>
+            </section>
+            <section class="panel-section">
+              <h3>Layout</h3>
+              <div class="stack">
+                <button class="row-button" type="button" data-spacing-toggle="full" aria-pressed="true">Even spacing: on</button>
+                <button class="row-button" type="button" data-label-toggle="full" aria-pressed="true">Labels: visible</button>
+              </div>
+            </section>
+            <section class="panel-section">
+              <div class="section-heading-row"><h3>Status</h3><button id="status-reset" class="text-button" type="button">Show all</button></div>
+              <fieldset id="status-filter" class="status-filter"><legend class="visually-hidden">Choose visible statuses</legend></fieldset>
+            </section>
+          </div>
+        </section>
+        <section class="island island-grow">
+          <header class="panel-header"><h2>Modules</h2><span class="stage-count" id="node-index-count"></span></header>
+          <div class="panel-body">
+            <ul id="node-index" class="node-index" aria-label="All visible modules"></ul>
+          </div>
+        </section>
+      </aside>
+      <button id="drawer-scrim" class="drawer-scrim" type="button" aria-label="Close open panel" hidden></button>
+
+      <!-- Walkthrough -->
+      <aside id="checkout-journey" class="panel panel-left journey-guide" aria-labelledby="journey-heading" hidden data-label-shield>
+        <section class="island atlas-journey-shell">
+          <header class="panel-header">
+            <div><h2 id="journey-heading">Walkthrough</h2></div>
+            <div class="panel-header-actions">
+              <button class="popover-close" type="button" id="journey-close" data-icon="x" data-icon-size="14" aria-label="Close the walkthrough"></button>
+            </div>
+          </header>
+          <div class="atlas-chapter-picker">
+            <div id="atlas-chapter-progress" class="atlas-chapter-progress" aria-hidden="true"></div>
+            <details id="atlas-chapters" class="atlas-chapters">
+              <summary><span id="atlas-chapter-position">1 / 1</span><span class="atlas-browse"><span>All chapters</span><span data-icon="caret-down" data-icon-size="16" data-icon-weight="regular" aria-hidden="true"></span></span></summary>
+              <ol id="journey-steps" class="journey-steps" aria-label="Chapters"></ol>
+            </details>
+          </div>
+          <div class="panel-body atlas-story-scroll">
+            <section id="journey-detail" class="journey-detail" aria-labelledby="journey-detail-heading">
+              <p id="journey-detail-overline" class="visually-hidden"></p>
+              <h3 id="journey-detail-heading"></h3>
+              <p id="journey-detail-description" class="journey-detail-description"></p>
+              <p id="journey-detail-boundary" class="callout"></p>
+              <details class="panel-details">
+                <summary>Files in this chapter<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary>
+                <ul id="journey-step-paths" class="journey-step-paths" aria-label="Files in this chapter"></ul>
+              </details>
+            </section>
+            <details class="panel-details atlas-journey-reference">
+              <summary>About this walkthrough<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary>
+              <p id="journey-summary" class="journey-summary"></p>
+              <div class="flow-picker">
+                <label class="flow-picker-label" for="flow-select">Source flow</label>
+                <select id="flow-select"></select>
+              </div>
+              <details class="panel-details">
+                <summary>How to read this view<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary>
+                <aside id="map-legend" class="map-legend" aria-label="Connection legend">
+                  <ul>
+                    <li><span class="legend-line is-solid" aria-hidden="true"></span><span class="legend-copy"><strong>Solid</strong>: call, request, or read</span></li>
+                    <li><span class="legend-line is-dashed" aria-hidden="true"></span><span class="legend-copy"><strong>Dashed</strong>: response returning control</span></li>
+                    <li><span class="legend-line is-dotted" aria-hidden="true"></span><span class="legend-copy"><strong>Dotted</strong>: hook or event</span></li>
+                    <li><span class="legend-line is-write" aria-hidden="true"></span><span class="legend-copy"><strong>Rose pulse</strong>: a write</span></li>
+                    <li><span class="legend-badge" aria-hidden="true">1</span><span class="legend-copy"><strong>Numbers</strong>: chapters of the story, not every call</span></li>
+                  </ul>
+                </aside>
+              </details>
+              <details class="panel-details">
+                <summary>Where this view stops<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary>
+                <p id="journey-entry-boundary"></p>
+                <p id="journey-completion-boundary"></p>
+              </details>
+            </details>
+          </div>
+          <details class="code-hops"><summary>Step through individual calls<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary><div id="atlas-hop-slot"></div></details>
+          <footer class="atlas-journey-footer">
+            <div class="journey-actions">
+              <button id="journey-previous" class="button button-secondary" type="button"><span data-icon="caret-left" data-icon-size="14" aria-hidden="true"></span><span class="button-text">Back</span></button>
+              <button id="journey-next" class="button button-accent" type="button"><span class="button-text">Next chapter</span></button>
+            </div>
+            <button id="journey-full-map" class="text-button" type="button"><span data-icon="arrow-left" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span><span>Back to map</span></button>
+          </footer>
+        </section>
+      </aside>
+
+      <!-- Walkthrough call stepper (moved into the walkthrough panel while it is open) -->
+      <section id="flow-hud" class="flow-hud" aria-labelledby="flow-heading" hidden data-label-shield>
+        <h2 id="flow-heading" class="visually-hidden">Calls in this source flow</h2>
+        <div class="flow-progress-group"><output id="flow-progress" class="flow-progress" aria-live="polite"></output><p id="flow-caution" class="caution"></p></div>
+        <div class="flow-actions">
+          <button id="flow-previous" class="mini" type="button" data-icon="caret-left" aria-label="Previous call"></button>
+          <button id="flow-next" class="mini" type="button" data-icon="caret-right" aria-label="Next call"></button>
+        </div>
+      </section>
+
+      <!-- Source panel -->
+      <aside id="inspector-panel" class="panel panel-right evidence-panel" data-label-shield aria-labelledby="inspector-heading" aria-hidden="true" hidden>
+        <header class="panel-header inspector-header">
+          <div class="module-meta"><span id="inspector-type">Module</span><span id="inspector-status" class="status-chip">Active</span></div>
+          <button id="inspector-close" class="popover-close" type="button" data-icon="x" data-icon-size="14" aria-label="Close module details"></button>
+        </header>
+        <div class="panel-body evidence-body">
+          <h2 id="inspector-heading" class="inspector-title">Select a module</h2>
+          <p id="inspector-purpose" class="inspector-purpose"></p>
+          <dl id="truth-grid" class="truth-grid" aria-label="Evidence confidence"></dl>
+          <div class="source-tabs" role="tablist" aria-label="Module details">
+            <button id="source-overview-tab" role="tab" type="button" aria-selected="true" aria-controls="source-overview">Overview</button>
+            <button id="source-files-tab" role="tab" type="button" aria-selected="false" aria-controls="source-files" tabindex="-1">Files</button>
+          </div>
+          <div id="source-files" role="tabpanel" aria-labelledby="source-files-tab" hidden>
+            <section class="panel-section">
+              <div class="section-heading-row"><h3 id="paths-title">Files</h3><button id="copy-context" class="button button-secondary small" type="button" data-icon="copy" data-icon-size="14"><span class="button-text">Copy context</span></button></div>
+              <ul id="inspector-paths" class="path-list"></ul>
+              <output id="copy-status" class="copy-status" aria-live="polite"></output>
+            </section>
+            <details class="panel-details"><summary>Revision &amp; module facts<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary><dl id="inspector-meta" class="meta-rows" aria-label="Module facts"></dl></details>
+          </div>
+          <div id="source-overview" role="tabpanel" aria-labelledby="source-overview-tab">
+            <details class="panel-details" open><summary id="trace-title">How it works<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary><ol id="inspector-trace" class="trace-list"></ol></details>
+            <details class="panel-details"><summary id="packet-title">Evidence shape <span id="packet-direction" class="packet-direction"></span><span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary><pre id="inspector-packet" class="packet-preview"></pre></details>
+            <details class="panel-details"><summary id="risk-title">Risks and limits<span class="disclosure-icon" data-icon="caret-down" data-icon-size="18" data-icon-weight="regular" aria-hidden="true"></span></summary><ul id="inspector-risks" class="detail-list"></ul><ul id="inspector-boundaries" class="detail-list boundary-list"></ul></details>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Help -->
+      <dialog id="help-dialog" class="dialog" aria-labelledby="help-title">
+        <div class="dialog-header"><h2 id="help-title">About Platform Atlas</h2><button id="help-close" class="popover-close" type="button" data-icon="x" data-icon-size="20" aria-label="Close help"></button></div>
+        <div class="dialog-body">
+          <p class="about-intro">A way into a large codebase. Explore its modules as a city, follow a source walkthrough, then open the files behind the map.</p>
+          <div class="about-links">
+            <a href="https://github.com/doniv01/platform-atlas" target="_blank" rel="noreferrer noopener" data-icon="github-logo" data-icon-size="20"><span>Project on GitHub</span></a>
+            <a href="https://github.com/doniv01" target="_blank" rel="noreferrer noopener" data-icon="user-circle" data-icon-size="20"><span>@doniv01</span></a>
+            <a href="./landing.html" data-icon="arrow-up-right" data-icon-size="20"><span>Project overview</span></a>
+          </div>
+          <p class="about-boundary">Each atlas is a curated snapshot pinned to one source revision. The map does not measure production traffic or prove that a feature is enabled; follow the file links to check the code yourself.</p>
+          <h3>Find your bearings</h3>
+          <ul class="help-list">
+            <li><strong>Map:</strong> select a tower to open its source panel. Files lists every path at the pinned revision.</li>
+            <li><strong>Modules:</strong> browse every module by type or district, or search when you know what you need.</li>
+            <li><strong>Walkthrough:</strong> read a chapter at a time, or step through the individual calls.</li>
+            <li><strong>Pan / Orbit / Move:</strong> slide the city, turn around it, or drag a tower or district. Scroll or pinch to zoom toward the cursor.</li>
+            <li><strong>Angle &amp; layers:</strong> drag the compass or use its arrow keys, snap to Front, Top, or Side, and show districts, modules, or both.</li>
+            <li><strong>Share:</strong> copy a link that reopens the selected module, or save a PNG of the 3D view.</li>
+            <li><strong>Settings:</strong> choose the Luminous, Matte, or Architectural finish. The finish and any saved view stay in this browser.</li>
+          </ul>
+          <button id="tour-start" class="button button-secondary" type="button" data-icon="sparkle" data-icon-size="20" data-icon-weight="regular">Take the six-step tour</button>
+        </div>
+      </dialog>
+
+      <!-- Guided tour -->
+      <div id="onboarding-overlay" class="onboarding-overlay" hidden>
+        <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+          <button id="onboarding-skip" class="popover-close onboarding-close" type="button" data-icon="x" data-icon-size="14" aria-label="Skip the tour"></button>
+          <h2 id="onboarding-title">Welcome</h2>
+          <p id="onboarding-body" class="onboarding-body"></p>
+          <div class="onboarding-footer">
+            <p id="onboarding-step-label" class="onboarding-step-label">Step 1 of 6</p>
+            <div class="onboarding-nav">
+              <button id="onboarding-prev" class="button button-secondary small" type="button">Back</button>
+              <button id="onboarding-next" class="button button-accent small" type="button">Next</button>
+            </div>
+          </div>
+        </div>
+        <div id="onboarding-spotlight" class="onboarding-spotlight" aria-hidden="true"></div>
+      </div>
+    </main>
+
+    <p id="atlas-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></p>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three/three.module.js",
+          "three/addons/": "./vendor/three/addons/"
+        }
+      }
+    </script>
+    <script type="module" src="./src/app.mjs"></script>
+  </body>
+</html>

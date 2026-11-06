@@ -1,0 +1,20 @@
+{
+  "exclude": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.git/**"
+  ],
+  "limits": {
+    "maxDistricts": 200,
+    "maxEdges": 20000,
+    "maxFileBytes": 1048576,
+    "maxGitTreeBytes": 33554432,
+    "maxNodes": 5000,
+    "maxTotalBytes": 134217728,
+    "maxTrackedFiles": 100000
+  },
+  "repositoryName": null
+}

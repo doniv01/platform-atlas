@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
+  <title id="title">Repository atlas</title>
+  <rect width="32" height="32" rx="8" fill="#17191d"/>
+  <path d="M10 9v12m0-8h8a4 4 0 0 1 4 4v4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="10" cy="8" r="2.4" fill="#b8a1ff"/>
+  <circle cx="10" cy="22" r="2.4" fill="#83d8e2"/>
+  <circle cx="22" cy="22" r="2.4" fill="#f0c98d"/>
+</svg>
